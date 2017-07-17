@@ -1,0 +1,122 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html;charset=utf-8">
+        <title>闭包作用域测试</title>
+    </head>
+    <body>
+        <ul id="ul">
+            <li>列表1</li>
+            <li>列表2</li>
+            <li>列表3</li>
+            <li>列表4</li>
+            <li>列表5</li>
+        </ul>
+        
+        
+        
+        <script>
+            var dm = "data1";
+            (function(data){
+                console.log(data);
+            })(dm)
+            var lis = document.getElementById('ul').getElementsByTagName('li');
+            for(var i = 0,len = lis.length;i<len;i++){
+                console.log(i);
+                //JS闭包最大的作用就是可以生成自己的作用域,在预解释阶段变量提升时可以找到相对应的变量对象,不必从外层作用域去寻找,这可避免全局变量污染
+                //method1:加一层闭包，i以函数参数形式传递给内层函数
+//                !function(args){
+//                    console.log("W"+args);
+//                   lis[i].onclick = function(){
+//                    console.log("N"+args);
+//                    alert(args);
+//                   } 
+//                }(i);
+                //method2：加一层闭包,i以局部变量形式传递给函数
+//                !function(){
+//                    var temp = i;//调用时的局部变量
+//                    lis[i].onclick = function(){
+//                        alert(temp);
+//                    }
+//                }();
+                //method3:加一层闭包,返回一个函数作为相应事件
+                lis[i].onclick = function(args){
+                    return function(){
+                        alert(args);
+                    }
+                }(i);
+                //method4:将变量i保存在每个节点对象的上
+                lis[i].i = i;
+                lis[i].onclick = function(){
+                    alert(this.i);
+                }
+                //method5:将变量i保存在匿名函数自身
+                (lis[i].onclick = function(){
+                    alert(arguments.call.i);
+                }).i = i;
+                //method6:用Function实现,实际上每产生一个函数实例就会产生一个闭包
+                lis[i].onclick = new Function("alert("+i+")");//new一次产生一个函数实例
+                //method7:用Function实现,与方法6有区别
+                lis[i].onclick = Function('alert('+i+')');
+//                lis[i].onclick = (function(){
+//                    alert(i);
+//                    //return i;
+//                })(i);
+            }
+            //var test = function(data){}(i)相当于test(i),直接调用test方法
+            var test = function(args){
+               console.log(args);
+                return '调用成功'
+            }(i);
+            console.log(test);
+            console.log(i);
+            var data =[];
+            for(var s=0;s<3;s++){
+                data[s] = (function(){
+                    return s;
+                })(s);
+            }
+            console.log(data[0]);
+            console.log(data[1]);
+            console.log(data[2]);
+//            var n = 10;
+//            function fn(){
+//                alert(n);
+//                var n = 9;
+//                alert(n);   
+//            }
+//            var aa = function(){
+//                alert(n);
+//                var n = 9;
+//                alert(n);  
+//            }
+//            aa();
+            /*
+            首先，我们知道解析器会对function定义的函数（也就是函数声明）在代码开始执行之前对其实行函数声明提升（function declaration hoisting），所以在函数声明之前调用该函数是不会在执行期间报错，但是函数表达式不同，函数表达式用 var 声明，也就是说解析器会对其变量提升，并对其赋值为undefined，然后在执行期间，等到执行到该var 变量的时候再将其变量指向一个function函数，所以在函数表达式之前执行该函数是会报错的。    
+            */
+            
+//            AA();
+//            function AA(){};
+//            BB();
+//            var BB = function(){};
+            
+            //fn();
+//            var ss = 100;
+//            (function(){
+//                console.log(ss);
+//                var ss = 99;
+//                console.log(ss);
+//            })()
+//            
+//            var AA = function(){
+//                console.log('AA_1');
+//            }
+//            AA();
+//            function AA(){
+//                console.log('AA_2');
+//            }
+//            AA();
+        </script>
+
+    </body>
+</html>
